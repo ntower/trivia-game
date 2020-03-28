@@ -1,9 +1,10 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC } from "react";
 import "./App.css";
 import GameBoard from "./components/GameBoard";
 import * as firebase from "firebase/app";
 import "firebase/firestore";
-import { Game } from "./gameTypes";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+import Home from "./components/Home";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDpKlHRPvOCSYJYqtszJkG_RojmpmxqRes",
@@ -20,23 +21,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const App: FC = () => {
-  const [game, setGame] = useState<null | Game>(null);
-  useEffect(() => {
-    const unsubscribe = firebase
-      .firestore()
-      .collection("games")
-      .doc("uZxitGIhgaDeg8qBXCmH")
-      .onSnapshot(snapshot => {
-        const data = snapshot.data();
-        if (data) {
-          setGame(data as Game);
-        } else {
-          setGame(null);
-        }
-      });
-    return unsubscribe;
-  }, []);
-  return <div className="App">{game && <GameBoard game={game} />}</div>;
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <Switch>
+          <Route path="/game/:gameId" component={GameBoard} />
+          <Route path="/" component={Home} />
+        </Switch>
+      </div>
+    </BrowserRouter>
+  );
 };
 
 export default App;
