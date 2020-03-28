@@ -1,16 +1,17 @@
 import React, { FC } from "react";
 import { useSpring, animated } from "react-spring";
 import "./styles.css";
+import { Card as CardType } from "../gameTypes";
 
 export interface CardProps {
-  flipped: boolean;
+  card: CardType;
   onClick: (e: React.MouseEvent) => void;
 }
 
-const Card: FC<CardProps> = ({ flipped, onClick }) => {
+const Card: FC<CardProps> = ({ card, onClick }) => {
   const { transform, opacity } = useSpring({
-    opacity: flipped ? 1 : 0,
-    transform: `perspective(600px) rotateX(${flipped ? 180 : 0}deg)`,
+    opacity: card.faceUp ? 1 : 0,
+    transform: `perspective(600px) rotateX(${card.faceUp ? 180 : 0}deg)`,
     config: { mass: 5, tension: 500, friction: 80 }
   });
   return (

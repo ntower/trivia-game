@@ -1,11 +1,13 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import Card from "./Card";
+import { Game } from "../gameTypes";
+import { firestore } from "firebase";
 
-export interface GameBoardProps {}
+export interface GameBoardProps {
+  game: Game;
+}
 
-const GameBoard: FC<GameBoardProps> = props => {
-  const [cards, setCards] = useState(new Array(15).fill({ flipped: "false" }));
-
+const GameBoard: FC<GameBoardProps> = ({ game }) => {
   return (
     <div
       style={{
@@ -16,19 +18,19 @@ const GameBoard: FC<GameBoardProps> = props => {
         justifyContent: "space-between"
       }}
     >
-      {cards.map((card, i) => (
+      {Object.values(game.board.cards).map(card => (
         <Card
-          key={i}
-          flipped={card.flipped}
+          key={card.cardId}
+          card={card}
           onClick={() => {
-            setCards(prev => {
-              const newCards = [...prev];
-              newCards[i] = {
-                ...prev[i],
-                flipped: !prev[i].flipped
-              };
-              return newCards;
-            });
+            const updatePayload: firestore.UpdateData = {
+              [`board.cards.${card.cardId}.faceUp`]: !card.faceUp
+            };
+
+            firestore()
+              .collection("games")
+              .doc(game.gameId)
+              .update(updatePayload);
           }}
         />
       ))}
