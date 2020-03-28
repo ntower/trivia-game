@@ -19,8 +19,11 @@ const Home: FC<HomeProps> = props => {
   }, []);
   return (
     <div>
+      <h1>Choose game</h1>
       {gameList.map(game => (
-        <Link key={game.gameId} to={`/games/${game.gameId}`} />
+        <Link key={game.gameId} to={`/game/${game.gameId}`}>
+          {game.gameId}
+        </Link>
       ))}
     </div>
   );
