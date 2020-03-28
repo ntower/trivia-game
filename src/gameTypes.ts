@@ -1,14 +1,23 @@
 export interface Game {
   gameId: string;
-  board: {
-    cards: {
-      [key: string]: Card;
-    };
+  categories: {
+    [key: string]: Category;
   };
 }
 
-export interface Card {
-  cardId: string;
+export interface Category {
+  categoryId: string;
+  ordinal: number;
+  title: string;
+  questions: {
+    [key: string]: Question;
+  };
+}
+
+export interface Question {
+  questionId: string;
+  ordinal: number;
+  frontText: string;
+  backText: string;
   faceUp: boolean;
-  text: string;
 }

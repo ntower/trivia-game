@@ -1,10 +1,13 @@
 import React, { FC, useState, useEffect } from "react";
-import Card from "./Card";
+import QuestionCard from "./QuestionCard";
 import { Game } from "../gameTypes";
 import { firestore } from "firebase";
 import { useRouteMatch } from "react-router-dom";
 
 export interface GameBoardProps {}
+
+const byOrdinal = (a: { ordinal: number }, b: { ordinal: number }) =>
+  a.ordinal - b.ordinal;
 
 const GameBoard: FC<GameBoardProps> = () => {
   const match = useRouteMatch<{ gameId: string }>();
@@ -46,24 +49,43 @@ const GameBoard: FC<GameBoardProps> = () => {
       }}
     >
       {game === null && <div>Game not found</div>}
-      {game &&
-        game !== "loading" &&
-        Object.values(game.board.cards).map(card => (
-          <Card
-            key={card.cardId}
-            card={card}
-            onClick={() => {
-              const updatePayload: firestore.UpdateData = {
-                [`board.cards.${card.cardId}.faceUp`]: !card.faceUp
-              };
+      {game && game !== "loading" && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between"
+          }}
+        >
+          {Object.values(game.categories)
+            .sort(byOrdinal)
+            .map(category => (
+              <div key={category.categoryId} style={{ width: `${100 / 6}%` }}>
+                <div style={{ width: "5em", height: "3em", margin: "1em" }}>
+                  {category.title}
+                </div>
+                {Object.values(category.questions)
+                  .sort(byOrdinal)
+                  .map(question => (
+                    <QuestionCard
+                      key={question.questionId}
+                      question={question}
+                      onClick={() => {
+                        const updatePayload: firestore.UpdateData = {
+                          [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp
+                        };
 
-              firestore()
-                .collection("games")
-                .doc(game.gameId)
-                .update(updatePayload);
-            }}
-          />
-        ))}
+                        firestore()
+                          .collection("games")
+                          .doc(game.gameId)
+                          .update(updatePayload);
+                      }}
+                    />
+                  ))}
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 };
