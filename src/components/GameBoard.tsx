@@ -41,13 +41,16 @@ const GameBoard: FC<GameBoardProps> = () => {
   return (
     <div
       style={{
-        width: "80%",
+        width: "100%",
         margin: "0 auto",
         display: "flex",
         flexWrap: "wrap",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        background: "#B4E1F1" ,
       }}
     >
+
+    
       {game === null && <div>Game not found</div>}
       {game && game !== "loading" && (
         <div
@@ -60,8 +63,8 @@ const GameBoard: FC<GameBoardProps> = () => {
           {Object.values(game.categories)
             .sort(byOrdinal)
             .map(category => (
-              <div key={category.categoryId} style={{ width: `${100 / 6}%` }}>
-                <div style={{ width: "5em", height: "3em", margin: "1em" }}>
+              <div key={category.categoryId} style={{ width: `${100 / 6}%`, fontSize:"17px", border:"solid blue 3px", justifyContent:"center", margin:"3px"}}>
+                <div style={{ width: "6em", height: "2em", margin: "2em",borderBottom:"solid blue 3px", padding:"10px", fontWeight: "bold"}}>
                   {category.title}
                 </div>
                 {Object.values(category.questions)
@@ -86,6 +89,18 @@ const GameBoard: FC<GameBoardProps> = () => {
             ))}
         </div>
       )}
+          <div
+     style={{
+      display: "flex",
+      flexWrap: "wrap",
+      justifyContent: "right",
+      background: "white",
+      border: "solid black",
+      width: "200px"
+
+    }}>
+     
+      </div>
     </div>
   );
 };
