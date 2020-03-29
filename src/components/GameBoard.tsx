@@ -38,69 +38,94 @@ const GameBoard: FC<GameBoardProps> = () => {
     }
   }, [match]);
 
+  if (game === null) {
+    return <div>Game not found</div>;
+  }
+
   return (
     <div
       style={{
         width: "100%",
+        height: "100%",
         margin: "0 auto",
         display: "flex",
         flexWrap: "wrap",
         justifyContent: "space-between",
-        background: "#B4E1F1" ,
+        background: "#B4E1F1"
       }}
     >
-
-    
-      {game === null && <div>Game not found</div>}
-      {game && game !== "loading" && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between"
-          }}
-        >
-          {Object.values(game.categories)
-            .sort(byOrdinal)
-            .map(category => (
-              <div key={category.categoryId} style={{ width: `${100 / 6}%`, fontSize:"17px", border:"solid blue 3px", justifyContent:"center", margin:"3px"}}>
-                <div style={{ width: "6em", height: "2em", margin: "2em",borderBottom:"solid blue 3px", padding:"10px", fontWeight: "bold"}}>
-                  {category.title}
-                </div>
-                {Object.values(category.questions)
-                  .sort(byOrdinal)
-                  .map(question => (
-                    <QuestionCard
-                      key={question.questionId}
-                      question={question}
-                      onClick={() => {
-                        const updatePayload: firestore.UpdateData = {
-                          [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp
-                        };
-
-                        firestore()
-                          .collection("games")
-                          .doc(game.gameId)
-                          .update(updatePayload);
-                      }}
-                    />
-                  ))}
-              </div>
-            ))}
-        </div>
-      )}
+      {game !== "loading" && (
+        <>
           <div
-     style={{
-      display: "flex",
-      flexWrap: "wrap",
-      justifyContent: "right",
-      background: "white",
-      border: "solid black",
-      width: "200px"
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between"
+            }}
+          >
+            {Object.values(game.categories)
+              .sort(byOrdinal)
+              .map(category => (
+                <div
+                  key={category.categoryId}
+                  style={{
+                    width: `${100 / 6}%`,
+                    fontSize: "17px",
+                    border: "solid blue 3px",
+                    justifyContent: "center",
+                    margin: "3px"
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "6em",
+                      height: "2em",
+                      margin: "2em",
+                      borderBottom: "solid blue 3px",
+                      padding: "10px",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {category.title}
+                  </div>
+                  {Object.values(category.questions)
+                    .sort(byOrdinal)
+                    .map(question => (
+                      <QuestionCard
+                        key={question.questionId}
+                        question={question}
+                        onClick={() => {
+                          const updatePayload: firestore.UpdateData = {
+                            [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp
+                          };
 
-    }}>
-     
-      </div>
+                          firestore()
+                            .collection("games")
+                            .doc(game.gameId)
+                            .update(updatePayload);
+                        }}
+                      />
+                    ))}
+                </div>
+              ))}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              background: "white",
+              border: "solid black",
+              width: "200px"
+            }}
+          >
+            {Object.values(game.players).map(player => (
+              <p>
+                {player.name}: ${player.score}
+              </p>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

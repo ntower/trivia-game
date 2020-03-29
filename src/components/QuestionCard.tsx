@@ -38,7 +38,7 @@ const QuestionCard: FC<QuestionCardProps> = ({ question, onClick }) => {
           transform
         }}
       >
-        {question.backText}
+        {question.text}
       </animated.div>
       <animated.div
         className="c front"
@@ -52,7 +52,7 @@ const QuestionCard: FC<QuestionCardProps> = ({ question, onClick }) => {
           transform: transform.interpolate(t => `${t} rotateX(180deg)`)
         }}
       >
-        {'$' + question.frontText}
+        {"$" + question.score}
       </animated.div>
     </div>
   );

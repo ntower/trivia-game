@@ -8,6 +8,16 @@ export interface HomeProps {}
 const numCategories = 6;
 const questionsPerCategory = 5;
 
+const placeholderValues = [200, 400, 600, 800, 1000];
+const placeholderNames = [
+  "Dinosaurs",
+  "Star Trek",
+  "Ancient Rome",
+  "Harry Potter",
+  "Disney",
+  "AWS"
+];
+
 const Home: FC<HomeProps> = props => {
   const history = useHistory();
 
@@ -29,21 +39,40 @@ const Home: FC<HomeProps> = props => {
       .doc();
     const game: Game = {
       gameId: ref.id,
+      name: "unnamed game",
+      description: "",
+      players: {
+        0: {
+          playerId: "0",
+          name: "Curly",
+          score: 0
+        },
+        1: {
+          playerId: "1",
+          name: "Larry",
+          score: 0
+        },
+        2: {
+          playerId: "2",
+          name: "Moe",
+          score: 0
+        }
+      },
       categories: {}
     };
     for (let i = 0; i < numCategories; i++) {
       game.categories[i] = {
         categoryId: "" + i,
         ordinal: i,
-        title: `Category ${i + 1}`,
+        title: placeholderNames[i] ?? `Category ${i + 1}`,
         questions: {}
       };
       for (let j = 0; j < questionsPerCategory; j++) {
         game.categories[i].questions[j] = {
           questionId: "" + j,
           ordinal: j,
-          frontText: `Front ${j + 1}`,
-          backText: `Back ${j + 1}`,
+          score: placeholderValues[j] || 42,
+          text: `Back ${j + 1}`,
           faceUp: true
         };
       }

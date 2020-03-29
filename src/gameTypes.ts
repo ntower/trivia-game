@@ -1,8 +1,19 @@
 export interface Game {
   gameId: string;
+  name: string;
+  description: string;
+  players: {
+    [key: string]: Player;
+  };
   categories: {
     [key: string]: Category;
   };
+}
+
+export interface Player {
+  playerId: string;
+  name: string;
+  score: number;
 }
 
 export interface Category {
@@ -17,7 +28,7 @@ export interface Category {
 export interface Question {
   questionId: string;
   ordinal: number;
-  frontText: string;
-  backText: string;
+  score: number;
+  text: string;
   faceUp: boolean;
 }
