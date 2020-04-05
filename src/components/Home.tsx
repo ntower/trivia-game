@@ -2,6 +2,7 @@ import React, { FC, useState, useEffect } from "react";
 import { firestore } from "firebase";
 import { Game } from "../gameTypes";
 import { Link, useHistory } from "react-router-dom";
+import { usePlayerId } from "./playerId";
 
 export interface HomeProps {}
 
@@ -15,57 +16,43 @@ const placeholderNames = [
   "Ancient Rome",
   "Harry Potter",
   "Disney",
-  "AWS"
+  "AWS",
 ];
 
-const Home: FC<HomeProps> = props => {
+const Home: FC<HomeProps> = (props) => {
   const history = useHistory();
+  const [name, setName] = useState("");
+  const playerId = usePlayerId();
 
   const [gameList, setGameList] = useState<Game[]>([]);
   useEffect(() => {
     firestore()
       .collection("games")
       .onSnapshot(
-        snapshot => {
-          setGameList(snapshot.docs.map(doc => doc.data() as Game));
+        (snapshot) => {
+          setGameList(snapshot.docs.map((doc) => doc.data() as Game));
         },
-        err => setGameList([])
+        (err) => setGameList([])
       );
   }, []);
 
   const createNewGame = async () => {
-    const ref = firestore()
-      .collection("games")
-      .doc();
+    const ref = firestore().collection("games").doc();
     const game: Game = {
       gameId: ref.id,
-      name: "unnamed game",
-      description: "",
-      players: {
-        0: {
-          playerId: "0",
-          name: "Curly",
-          score: 0
-        },
-        1: {
-          playerId: "1",
-          name: "Larry",
-          score: 0
-        },
-        2: {
-          playerId: "2",
-          name: "Moe",
-          score: 0
-        }
-      },
-      categories: {}
+      name,
+      state: "pregame",
+      activePlayer: null,
+      hostId: playerId,
+      players: {},
+      categories: {},
     };
     for (let i = 0; i < numCategories; i++) {
       game.categories[i] = {
         categoryId: "" + i,
         ordinal: i,
         title: placeholderNames[i] ?? `Category ${i + 1}`,
-        questions: {}
+        questions: {},
       };
       for (let j = 0; j < questionsPerCategory; j++) {
         game.categories[i].questions[j] = {
@@ -73,7 +60,7 @@ const Home: FC<HomeProps> = props => {
           ordinal: j,
           score: placeholderValues[j] || 42,
           text: `Back ${j + 1}`,
-          faceUp: true
+          faceUp: true,
         };
       }
     }
@@ -82,17 +69,45 @@ const Home: FC<HomeProps> = props => {
   };
 
   return (
-    <div>
-      <button onClick={createNewGame}>Create new game</button>
-      <h1>Or choose existing game</h1>
-      {gameList.map(game => (
-        <React.Fragment key={game.gameId}>
-          <Link key={game.gameId} to={`/game/${game.gameId}`}>
-            {game.gameId}
-          </Link>
-          <br />
-        </React.Fragment>
-      ))}
+    <div className="hero-body">
+      <div className="container has-text-centered">
+        <div className="column is-6 is-offset-3">
+          <h1 className="title">Start a game</h1>
+          <div className="box">
+            <div className="field is-grouped">
+              <p className="control is-expanded">
+                <input
+                  className="input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
+                  placeholder="Name your game"
+                />
+              </p>
+              <p className="control">
+                <button
+                  disabled={!name}
+                  onClick={createNewGame}
+                  className="button is-info"
+                >
+                  Go!
+                </button>
+              </p>
+            </div>
+          </div>
+          <h2 className="title is-4">Or choose an existing game</h2>
+          {gameList.map((game) => (
+            <React.Fragment key={game.gameId}>
+              <Link key={game.gameId} to={`/game/${game.gameId}`}>
+                {game.name || game.gameId}
+              </Link>
+              <br />
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

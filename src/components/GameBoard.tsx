@@ -1,132 +1,97 @@
-import React, { FC, useState, useEffect } from "react";
-import QuestionCard from "./QuestionCard";
-import { Game } from "../gameTypes";
+import React, { FC, useState } from "react";
+import { Game, Player } from "../gameTypes";
+import QuestionGrid from "./QuestionGrid";
+import StatusBar from "./StatusBar";
+import ScoreBoard from "./ScoreBoard";
+import { usePlayerId } from "./playerId";
+import { useHistory } from "react-router-dom";
 import { firestore } from "firebase";
-import { useRouteMatch } from "react-router-dom";
+import RoleBar from "./RoleBar";
 
-export interface GameBoardProps {}
+export interface GameBoardProps {
+  game: Game;
+}
 
-const byOrdinal = (a: { ordinal: number }, b: { ordinal: number }) =>
-  a.ordinal - b.ordinal;
-
-const GameBoard: FC<GameBoardProps> = () => {
-  const match = useRouteMatch<{ gameId: string }>();
-  const [game, setGame] = useState<"loading" | null | Game>("loading");
-  useEffect(() => {
-    const gameId = match.params.gameId;
-    if (gameId) {
-      setGame("loading");
-      const unsubscribe = firestore()
-        .collection("games")
-        .doc(gameId)
-        .onSnapshot(
-          snapshot => {
-            const data = snapshot.data();
-            if (data) {
-              setGame(data as Game);
-            } else {
-              setGame(null);
-            }
-          },
-          err => {
-            setGame(null);
-          }
-        );
-      return unsubscribe;
-    } else {
-      setGame(null);
-    }
-  }, [match]);
-
-  if (game === null) {
-    return <div>Game not found</div>;
+export type Role = "player" | "host" | "spectator" | "none";
+export const getRole = (game: Game, playerId: string) => {
+  if (game.hostId === playerId) {
+    return "host";
   }
+  if (game.players[playerId]) {
+    return "player";
+  }
+  if (game.state !== "pregame") {
+    return "spectator";
+  }
+  return "none";
+};
+
+const GameBoard: FC<GameBoardProps> = ({ game }) => {
+  const history = useHistory();
+  const playerId = usePlayerId();
+  const [name, setName] = useState("");
+  const role = getRole(game, playerId);
+
+  const join = () => {
+    const player: Player = {
+      playerId,
+      name,
+      score: 0,
+    };
+    const updatePayload: firestore.UpdateData = {
+      [`players.${playerId}`]: player,
+    };
+
+    firestore().collection("games").doc(game.gameId).update(updatePayload);
+  };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        margin: "0 auto",
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-        background: "#B4E1F1"
-      }}
-    >
-      {game !== "loading" && (
-        <>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between"
-            }}
-          >
-            {Object.values(game.categories)
-              .sort(byOrdinal)
-              .map(category => (
-                <div
-                  key={category.categoryId}
-                  style={{
-                    width: `${100 / 6}%`,
-                    fontSize: "17px",
-                    border: "solid blue 3px",
-                    justifyContent: "center",
-                    margin: "3px"
+    <>
+      <div className="columns">
+        <div className="column is-four-fifths">
+          <QuestionGrid game={game} />
+          <StatusBar game={game} />
+          <RoleBar game={game} />
+        </div>
+        <div className="column">
+          <ScoreBoard game={game} />
+        </div>
+      </div>
+      <div className={role === "none" ? "modal is-active" : "modal"}>
+        <div className="modal-background"></div>
+        <div className="modal-content">
+          <div className="box">
+            <div className="field is-grouped">
+              <p className="control is-expanded">
+                <input
+                  className="input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
                   }}
-                >
-                  <div
-                    style={{
-                      width: "6em",
-                      height: "2em",
-                      margin: "2em",
-                      borderBottom: "solid blue 3px",
-                      padding: "10px",
-                      fontWeight: "bold"
-                    }}
-                  >
-                    {category.title}
-                  </div>
-                  {Object.values(category.questions)
-                    .sort(byOrdinal)
-                    .map(question => (
-                      <QuestionCard
-                        key={question.questionId}
-                        question={question}
-                        onClick={() => {
-                          const updatePayload: firestore.UpdateData = {
-                            [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp
-                          };
-
-                          firestore()
-                            .collection("games")
-                            .doc(game.gameId)
-                            .update(updatePayload);
-                        }}
-                      />
-                    ))}
-                </div>
-              ))}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              background: "white",
-              border: "solid black",
-              width: "200px"
-            }}
-          >
-            {Object.values(game.players).map(player => (
-              <p>
-                {player.name}: ${player.score}
+                  placeholder="Enter your name"
+                />
               </p>
-            ))}
+              <p className="control">
+                <button
+                  onClick={join}
+                  className="button is-info"
+                  disabled={!name}
+                >
+                  Join Game
+                </button>
+              </p>
+            </div>
           </div>
-        </>
-      )}
-    </div>
+        </div>
+        <button
+          onClick={() => history.goBack()}
+          className="modal-close is-large"
+          aria-label="close"
+        ></button>
+      </div>
+    </>
   );
 };
 

@@ -1,7 +1,15 @@
+export type GameState =
+  | "pregame"
+  | "selectingQuestion"
+  | "displayingQuestion"
+  | "awaitingAnswer";
+
 export interface Game {
   gameId: string;
   name: string;
-  description: string;
+  state: GameState;
+  activePlayer: string | null;
+  hostId: string;
   players: {
     [key: string]: Player;
   };
