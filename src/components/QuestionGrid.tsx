@@ -47,7 +47,7 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
                     if (
                       !question.faceUp ||
                       game.state !== "selectingQuestion" ||
-                      game.activePlayer !== playerId
+                      playerId !== game.hostId
                     ) {
                       return;
                     }
@@ -56,7 +56,7 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
                       state: "displayingQuestion",
                       activePlayer: null,
                       activeQuestion: question,
-                      [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp,
+                      [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp
                     };
 
                     firestore()
