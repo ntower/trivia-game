@@ -46,6 +46,7 @@ const Home: FC<HomeProps> = props => {
       activeQuestion: null,
       lastPlayerToSuccessfullyAnswer: null,
       hostId: playerId,
+      barredFromBuzzingIn: {},
       players: {},
       categories: {}
     };

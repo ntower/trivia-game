@@ -8,15 +8,24 @@ export interface Game {
   gameId: string;
   name: string;
   state: GameState;
+  /**
+   * The id of the player who needs to make the next action
+   */
   activePlayer: string | null;
   lastPlayerToSuccessfullyAnswer: string | null;
   activeQuestion: Question | null;
   hostId: string;
+  /**
+   * Players who have buzzed in and given a wrong answer
+   */
+  barredFromBuzzingIn: {
+    [playerId: string]: true;
+  };
   players: {
-    [key: string]: Player;
+    [playerId: string]: Player;
   };
   categories: {
-    [key: string]: Category;
+    [categoryId: string]: Category;
   };
 }
 

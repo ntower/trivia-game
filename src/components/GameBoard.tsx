@@ -71,7 +71,8 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
       [`players.${game.activePlayer}.score`]:
         game.players[game.activePlayer].score + game.activeQuestion.score,
       state: "selectingQuestion",
-      lastPlayerToSuccessfullyAnswer: game.activePlayer
+      lastPlayerToSuccessfullyAnswer: game.activePlayer,
+      barredFromBuzzingIn: {}
     };
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
@@ -84,7 +85,8 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
     const updatePayload: firestore.UpdateData = {
       [`players.${game.activePlayer}.score`]:
         game.players[game.activePlayer].score - game.activeQuestion.score,
-      state: "displayingQuestion"
+      state: "displayingQuestion",
+      [`barredFromBuzzingIn.${game.activePlayer}`]: true
     };
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
@@ -92,7 +94,8 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
   const abandonQuestion = () => {
     const updatePayload: firestore.UpdateData = {
       state: "selectingQuestion",
-      activePlayer: game.lastPlayerToSuccessfullyAnswer
+      activePlayer: game.lastPlayerToSuccessfullyAnswer,
+      barredFromBuzzingIn: {}
     };
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
@@ -126,7 +129,11 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
             </p>
             <br />
             {game.state === "displayingQuestion" && role !== "host" && (
-              <button onClick={buzzIn} className="button is-info is-large">
+              <button
+                onClick={buzzIn}
+                className="button is-info is-large"
+                disabled={game.barredFromBuzzingIn[playerId]}
+              >
                 BUZZ IN!
               </button>
             )}
