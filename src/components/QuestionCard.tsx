@@ -9,11 +9,6 @@ export interface QuestionCardProps {
 }
 
 const QuestionCard: FC<QuestionCardProps> = ({ question, onClick }) => {
-  // const { transform, opacity } = useSpring({
-  //   opacity: question.faceUp ? 1 : 0,
-  //   transform: `perspective(600px) rotateX(${question.faceUp ? 180 : 0}deg)`,
-  //   config: { mass: 5, tension: 500, friction: 80 },
-  // });
   const colors = question.faceUp
     ? "has-background-info has-text-white"
     : "has-background-light";
@@ -35,7 +30,7 @@ const QuestionCard: FC<QuestionCardProps> = ({ question, onClick }) => {
       // }}
       onClick={onClick}
     >
-      {question.faceUp ? `$${question.score}` : question.text}
+      {question.faceUp ? `$${question.score}` : ""}
       {/* <animated.div
         className="c back"
         style={{

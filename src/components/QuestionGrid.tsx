@@ -2,6 +2,7 @@ import React, { FC } from "react";
 import { Game } from "../gameTypes";
 import QuestionCard from "./QuestionCard";
 import { firestore } from "firebase";
+import { usePlayerId } from "./playerId";
 
 export interface QuestionGridProps {
   game: Game;
@@ -11,6 +12,7 @@ const byOrdinal = (a: { ordinal: number }, b: { ordinal: number }) =>
   a.ordinal - b.ordinal;
 
 const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
+  const playerId = usePlayerId();
   return (
     <div
       className="columns is-gapless"
@@ -42,8 +44,17 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
                   key={question.questionId}
                   question={question}
                   onClick={() => {
+                    if (
+                      game.state !== "selectingQuestion" ||
+                      game.activePlayer !== playerId
+                    ) {
+                      return;
+                    }
+
                     const updatePayload: firestore.UpdateData = {
-                      [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp,
+                      state: "displayingQuestion",
+                      activePlayer: null,
+                      activeQuestion: question,
                     };
 
                     firestore()

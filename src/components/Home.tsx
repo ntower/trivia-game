@@ -43,6 +43,7 @@ const Home: FC<HomeProps> = (props) => {
       name,
       state: "pregame",
       activePlayer: null,
+      activeQuestion: null,
       hostId: playerId,
       players: {},
       categories: {},
@@ -97,15 +98,19 @@ const Home: FC<HomeProps> = (props) => {
               </p>
             </div>
           </div>
-          <h2 className="title is-4">Or choose an existing game</h2>
-          {gameList.map((game) => (
-            <React.Fragment key={game.gameId}>
-              <Link key={game.gameId} to={`/game/${game.gameId}`}>
-                {game.name || game.gameId}
-              </Link>
-              <br />
-            </React.Fragment>
-          ))}
+          {gameList.length > 0 && (
+            <>
+              <h2 className="title is-4">Or choose an existing game</h2>
+              {gameList.map((game) => (
+                <React.Fragment key={game.gameId}>
+                  <Link key={game.gameId} to={`/game/${game.gameId}`}>
+                    {game.name || game.gameId}
+                  </Link>
+                  <br />
+                </React.Fragment>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React, { FC, useState } from "react";
 import { Game, Player } from "../gameTypes";
 import QuestionGrid from "./QuestionGrid";
-import StatusBar from "./StatusBar";
+import StatusBar, { getActivePlayerName } from "./StatusBar";
 import ScoreBoard from "./ScoreBoard";
 import { usePlayerId } from "./playerId";
 import { useHistory } from "react-router-dom";
@@ -45,6 +45,23 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
 
+  const buzzIn = () => {
+    // Guard against synchronoization errors. We only want to update the db
+    //   if someone else hasn't buzzed in already
+    const gameRef = firestore().collection("games").doc(game.gameId);
+    firestore().runTransaction(async (t) => {
+      const doc = await t.get(gameRef);
+      const state = (doc.data() as Game).state;
+      if (state === "displayingQuestion") {
+        const updatePayload: firestore.UpdateData = {
+          state: "awaitingAnswer",
+          activePlayer: playerId,
+        };
+        t.update(gameRef, updatePayload);
+      }
+    });
+  };
+
   return (
     <>
       <div className="columns">
@@ -57,6 +74,55 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
           <ScoreBoard game={game} />
         </div>
       </div>
+
+      <div
+        className={
+          game.state === "displayingQuestion" || game.state === "awaitingAnswer"
+            ? "modal is-active"
+            : "modal"
+        }
+      >
+        <div className="modal-background"></div>
+        <div className="modal-content">
+          <div className="box">
+            <h2 className="title">Foo</h2>
+            <p>
+              {game.activeQuestion?.text ?? "Huh... the question is missing"}
+            </p>
+            <br />
+            {game.state === "displayingQuestion" && role !== "host" && (
+              <button onClick={buzzIn} className="button is-info is-large">
+                BUZZ IN!
+              </button>
+            )}
+            {game.state === "displayingQuestion" && role === "host" && (
+              <button className="button is-info is-large">
+                No one answered
+              </button>
+            )}
+            {game.state === "awaitingAnswer" && (
+              <>
+                <h3 className="subtitle">
+                  {getActivePlayerName(game, playerId, true)} buzzed in first
+                </h3>
+                {role === "host" ? (
+                  <>
+                    <button className="button is-info is-large">Correct</button>
+                    <button className="button is-warning is-large">
+                      Incorrect
+                    </button>
+                  </>
+                ) : (
+                  <h3 className="subtitle">
+                    Waiting for host to judge the answer
+                  </h3>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className={role === "none" ? "modal is-active" : "modal"}>
         <div className="modal-background"></div>
         <div className="modal-content">
