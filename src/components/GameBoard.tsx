@@ -36,10 +36,10 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
     const player: Player = {
       playerId,
       name,
-      score: 0,
+      score: 0
     };
     const updatePayload: firestore.UpdateData = {
-      [`players.${playerId}`]: player,
+      [`players.${playerId}`]: player
     };
 
     firestore().collection("games").doc(game.gameId).update(updatePayload);
@@ -49,17 +49,52 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
     // Guard against synchronoization errors. We only want to update the db
     //   if someone else hasn't buzzed in already
     const gameRef = firestore().collection("games").doc(game.gameId);
-    firestore().runTransaction(async (t) => {
+    firestore().runTransaction(async t => {
       const doc = await t.get(gameRef);
       const state = (doc.data() as Game).state;
       if (state === "displayingQuestion") {
         const updatePayload: firestore.UpdateData = {
           state: "awaitingAnswer",
-          activePlayer: playerId,
+          activePlayer: playerId
         };
         t.update(gameRef, updatePayload);
       }
     });
+  };
+
+  const judgeCorrect = () => {
+    if (!game.activePlayer || !game.activeQuestion) {
+      return;
+    }
+
+    const updatePayload: firestore.UpdateData = {
+      [`players.${game.activePlayer}.score`]:
+        game.players[game.activePlayer].score + game.activeQuestion.score,
+      state: "selectingQuestion",
+      lastPlayerToSuccessfullyAnswer: game.activePlayer
+    };
+    firestore().collection("games").doc(game.gameId).update(updatePayload);
+  };
+
+  const judgeIncorrect = () => {
+    if (!game.activePlayer || !game.activeQuestion) {
+      return;
+    }
+
+    const updatePayload: firestore.UpdateData = {
+      [`players.${game.activePlayer}.score`]:
+        game.players[game.activePlayer].score - game.activeQuestion.score,
+      state: "displayingQuestion"
+    };
+    firestore().collection("games").doc(game.gameId).update(updatePayload);
+  };
+
+  const abandonQuestion = () => {
+    const updatePayload: firestore.UpdateData = {
+      state: "selectingQuestion",
+      activePlayer: game.lastPlayerToSuccessfullyAnswer
+    };
+    firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
 
   return (
@@ -96,7 +131,10 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
               </button>
             )}
             {game.state === "displayingQuestion" && role === "host" && (
-              <button className="button is-info is-large">
+              <button
+                onClick={abandonQuestion}
+                className="button is-info is-large"
+              >
                 No one answered
               </button>
             )}
@@ -107,8 +145,16 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
                 </h3>
                 {role === "host" ? (
                   <>
-                    <button className="button is-info is-large">Correct</button>
-                    <button className="button is-warning is-large">
+                    <button
+                      onClick={judgeCorrect}
+                      className="button is-info is-large"
+                    >
+                      Correct
+                    </button>
+                    <button
+                      onClick={judgeIncorrect}
+                      className="button is-warning is-large"
+                    >
                       Incorrect
                     </button>
                   </>
@@ -133,7 +179,7 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
                   className="input"
                   type="text"
                   value={name}
-                  onChange={(e) => {
+                  onChange={e => {
                     setName(e.target.value);
                   }}
                   placeholder="Enter your name"

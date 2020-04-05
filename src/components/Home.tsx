@@ -16,10 +16,10 @@ const placeholderNames = [
   "Ancient Rome",
   "Harry Potter",
   "Disney",
-  "AWS",
+  "AWS"
 ];
 
-const Home: FC<HomeProps> = (props) => {
+const Home: FC<HomeProps> = props => {
   const history = useHistory();
   const [name, setName] = useState("");
   const playerId = usePlayerId();
@@ -29,10 +29,10 @@ const Home: FC<HomeProps> = (props) => {
     firestore()
       .collection("games")
       .onSnapshot(
-        (snapshot) => {
-          setGameList(snapshot.docs.map((doc) => doc.data() as Game));
+        snapshot => {
+          setGameList(snapshot.docs.map(doc => doc.data() as Game));
         },
-        (err) => setGameList([])
+        err => setGameList([])
       );
   }, []);
 
@@ -44,16 +44,17 @@ const Home: FC<HomeProps> = (props) => {
       state: "pregame",
       activePlayer: null,
       activeQuestion: null,
+      lastPlayerToSuccessfullyAnswer: null,
       hostId: playerId,
       players: {},
-      categories: {},
+      categories: {}
     };
     for (let i = 0; i < numCategories; i++) {
       game.categories[i] = {
         categoryId: "" + i,
         ordinal: i,
         title: placeholderNames[i] ?? `Category ${i + 1}`,
-        questions: {},
+        questions: {}
       };
       for (let j = 0; j < questionsPerCategory; j++) {
         game.categories[i].questions[j] = {
@@ -61,7 +62,7 @@ const Home: FC<HomeProps> = (props) => {
           ordinal: j,
           score: placeholderValues[j] || 42,
           text: `Back ${j + 1}`,
-          faceUp: true,
+          faceUp: true
         };
       }
     }
@@ -81,7 +82,7 @@ const Home: FC<HomeProps> = (props) => {
                   className="input"
                   type="text"
                   value={name}
-                  onChange={(e) => {
+                  onChange={e => {
                     setName(e.target.value);
                   }}
                   placeholder="Name your game"
@@ -101,7 +102,7 @@ const Home: FC<HomeProps> = (props) => {
           {gameList.length > 0 && (
             <>
               <h2 className="title is-4">Or choose an existing game</h2>
-              {gameList.map((game) => (
+              {gameList.map(game => (
                 <React.Fragment key={game.gameId}>
                   <Link key={game.gameId} to={`/game/${game.gameId}`}>
                     {game.name || game.gameId}

@@ -9,6 +9,7 @@ export interface Game {
   name: string;
   state: GameState;
   activePlayer: string | null;
+  lastPlayerToSuccessfullyAnswer: string | null;
   activeQuestion: Question | null;
   hostId: string;
   players: {

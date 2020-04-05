@@ -15,7 +15,8 @@ const RoleBar: FC<RoleBarProps> = ({ game }) => {
   const startGame = () => {
     const updatePayload: firestore.UpdateData = {
       state: "selectingQuestion",
-      activePlayer: Object.keys(game.players)[0],
+      lastPlayerToSuccessfullyAnswer: Object.keys(game.players)[0],
+      activePlayer: Object.keys(game.players)[0]
     };
 
     firestore().collection("games").doc(game.gameId).update(updatePayload);

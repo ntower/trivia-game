@@ -24,7 +24,7 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
     >
       {Object.values(game.categories)
         .sort(byOrdinal)
-        .map((category) => (
+        .map(category => (
           <div
             key={category.categoryId}
             className="column is-2 has-text-centered"
@@ -32,19 +32,20 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
             <div
               className="box has-background-light"
               style={{
-                height: "6em",
+                height: "6em"
               }}
             >
               <div className="title is-6">{category.title}</div>
             </div>
             {Object.values(category.questions)
               .sort(byOrdinal)
-              .map((question) => (
+              .map(question => (
                 <QuestionCard
                   key={question.questionId}
                   question={question}
                   onClick={() => {
                     if (
+                      !question.faceUp ||
                       game.state !== "selectingQuestion" ||
                       game.activePlayer !== playerId
                     ) {
@@ -55,6 +56,7 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
                       state: "displayingQuestion",
                       activePlayer: null,
                       activeQuestion: question,
+                      [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp,
                     };
 
                     firestore()
