@@ -3,8 +3,9 @@ export type GameState =
   | "selectingQuestion"
   | "displayingQuestion"
   | "awaitingAnswer"
-  | "displayingFinal"
-  | "judgingFinal";
+  | "finalWager"
+  | "finalAnswer"
+  | "finalJudging";
 
 export interface Game {
   gameId: string;
@@ -29,7 +30,7 @@ export interface Game {
   currentRound: 1 | 2 | "final";
   round1: CategoryCollection;
   round2: CategoryCollection;
-  finalJeopardy: FinalQuestion;
+  finalQuestion: FinalQuestion;
 }
 
 export interface CategoryCollection {
@@ -61,6 +62,7 @@ export interface Question {
 }
 
 export interface FinalQuestion {
+  category: string;
   text: string;
   solution: string;
 }

@@ -51,9 +51,10 @@ const Home: FC<HomeProps> = props => {
       currentRound: 1,
       round1: {},
       round2: {},
-      finalJeopardy: {
-        text: "final question",
-        solution: ""
+      finalQuestion: {
+        category: "category",
+        text: "final question text",
+        solution: "final question solution"
       }
     };
     for (let i = 0; i < numCategories; i++) {

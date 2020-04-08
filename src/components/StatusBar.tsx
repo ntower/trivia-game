@@ -13,8 +13,9 @@ const messages: Record<GameState, (activePlayer: string) => string> = {
   displayingQuestion: () => `Waiting for someone to buzz in`,
   awaitingAnswer: activePlayer =>
     `Waiting for ${activePlayer} to answer the question`,
-  displayingFinal: () => `Showing final jeopardy`,
-  judgingFinal: () => `Judging answers`
+  finalWager: () => "",
+  finalAnswer: () => "",
+  finalJudging: () => ""
 };
 
 export const getActivePlayerName = (

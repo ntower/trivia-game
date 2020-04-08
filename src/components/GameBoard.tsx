@@ -1,12 +1,13 @@
 import React, { FC, useState } from "react";
-import { Game, Player } from "../gameTypes";
+import { Game } from "../gameTypes";
 import QuestionGrid from "./QuestionGrid";
-import StatusBar, { getActivePlayerName } from "./StatusBar";
+import StatusBar from "./StatusBar";
 import ScoreBoard from "./ScoreBoard";
 import { usePlayerId } from "./playerId";
-import { useHistory } from "react-router-dom";
-import { firestore } from "firebase";
 import RoleBar from "./RoleBar";
+import QuestionModal from "./QuestionModal";
+import JoinGameModal from "./JoinGameModal";
+import FinalQuestionModal from "./FinalQuestionModal";
 
 export interface GameBoardProps {
   game: Game;
@@ -27,130 +28,8 @@ export const getRole = (game: Game, playerId: string) => {
 };
 
 const GameBoard: FC<GameBoardProps> = ({ game }) => {
-  const history = useHistory();
   const playerId = usePlayerId();
-  const [name, setName] = useState("");
   const role = getRole(game, playerId);
-
-  const join = () => {
-    const player: Player = {
-      playerId,
-      name,
-      score: 0
-    };
-    const updatePayload: firestore.UpdateData = {
-      [`players.${playerId}`]: player
-    };
-
-    firestore().collection("games").doc(game.gameId).update(updatePayload);
-  };
-
-  const buzzIn = () => {
-    // Guard against synchronoization errors. We only want to update the db
-    //   if someone else hasn't buzzed in already
-    const gameRef = firestore().collection("games").doc(game.gameId);
-    firestore().runTransaction(async t => {
-      const doc = await t.get(gameRef);
-      const state = (doc.data() as Game).state;
-      if (state === "displayingQuestion") {
-        const updatePayload: firestore.UpdateData = {
-          state: "awaitingAnswer",
-          activePlayer: playerId
-        };
-        t.update(gameRef, updatePayload);
-      }
-    });
-  };
-
-  const judgeCorrect = () => {
-    if (!game.activePlayer || !game.activeQuestion) {
-      return;
-    }
-
-    const { currentRound } = game;
-    if (currentRound === "final") {
-      console.warn("judging final jeopardy not yet implemented");
-      return;
-    }
-    const categories = game.currentRound === 1 ? game.round1 : game.round1;
-    let hasMoreQuestions = Object.values(categories).some(category =>
-      Object.values(category.questions).some(question => question.faceUp)
-    );
-
-    let updatePayload: firestore.UpdateData = {
-      [`players.${game.activePlayer}.score`]:
-        game.players[game.activePlayer].score + game.activeQuestion.score,
-      lastPlayerToSuccessfullyAnswer: game.activePlayer,
-      barredFromBuzzingIn: {}
-    };
-    if (hasMoreQuestions) {
-      updatePayload = {
-        state: "selectingQuestion"
-      };
-    } else if (currentRound === 1) {
-      updatePayload = {
-        state: "selectingQuestion",
-        currentRound: 2
-      };
-    } else {
-      // currentRound === 2
-      updatePayload = {
-        state: "displayingFinal",
-        currentRound: "final"
-      };
-    }
-
-    firestore().collection("games").doc(game.gameId).update(updatePayload);
-  };
-
-  const judgeIncorrect = () => {
-    if (!game.activePlayer || !game.activeQuestion) {
-      return;
-    }
-
-    const updatePayload: firestore.UpdateData = {
-      [`players.${game.activePlayer}.score`]:
-        game.players[game.activePlayer].score - game.activeQuestion.score,
-      state: "displayingQuestion",
-      [`barredFromBuzzingIn.${game.activePlayer}`]: true
-    };
-    firestore().collection("games").doc(game.gameId).update(updatePayload);
-  };
-
-  const abandonQuestion = () => {
-    const { currentRound } = game;
-    if (currentRound === "final") {
-      console.warn("judging final jeopardy not yet implemented");
-      return;
-    }
-    const categories = game.currentRound === 1 ? game.round1 : game.round1;
-    let hasMoreQuestions = Object.values(categories).some(category =>
-      Object.values(category.questions).some(question => question.faceUp)
-    );
-
-    let updatePayload: firestore.UpdateData = {
-      activePlayer: game.lastPlayerToSuccessfullyAnswer,
-      barredFromBuzzingIn: {}
-    };
-    if (hasMoreQuestions) {
-      updatePayload = {
-        state: "selectingQuestion"
-      };
-    } else if (currentRound === 1) {
-      updatePayload = {
-        state: "selectingQuestion",
-        currentRound: 2
-      };
-    } else {
-      // currentRound === 2
-      updatePayload = {
-        state: "displayingFinal",
-        currentRound: "final"
-      };
-    }
-
-    firestore().collection("games").doc(game.gameId).update(updatePayload);
-  };
 
   return (
     <>
@@ -165,103 +44,14 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
         </div>
       </div>
 
-      <div
-        className={
-          game.state === "displayingQuestion" || game.state === "awaitingAnswer"
-            ? "modal is-active"
-            : "modal"
-        }
-      >
-        <div className="modal-background"></div>
-        <div className="modal-content">
-          <div className="box">
-            <h2 className="title">Foo</h2>
-            <p>
-              {game.activeQuestion?.text ?? "Huh... the question is missing"}
-            </p>
-            <br />
-            {game.state === "displayingQuestion" && role !== "host" && (
-              <button
-                onClick={buzzIn}
-                className="button is-info is-large"
-                disabled={game.barredFromBuzzingIn[playerId]}
-              >
-                BUZZ IN!
-              </button>
-            )}
-            {game.state === "displayingQuestion" && role === "host" && (
-              <button
-                onClick={abandonQuestion}
-                className="button is-info is-large"
-              >
-                No one answered
-              </button>
-            )}
-            {game.state === "awaitingAnswer" && (
-              <>
-                <h3 className="subtitle">
-                  {getActivePlayerName(game, playerId, true)} buzzed in first
-                </h3>
-                {role === "host" ? (
-                  <>
-                    <button
-                      onClick={judgeCorrect}
-                      className="button is-info is-large"
-                    >
-                      Correct
-                    </button>
-                    <button
-                      onClick={judgeIncorrect}
-                      className="button is-warning is-large"
-                    >
-                      Incorrect
-                    </button>
-                  </>
-                ) : (
-                  <h3 className="subtitle">
-                    Waiting for host to judge the answer
-                  </h3>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className={role === "none" ? "modal is-active" : "modal"}>
-        <div className="modal-background"></div>
-        <div className="modal-content">
-          <div className="box">
-            <div className="field is-grouped">
-              <p className="control is-expanded">
-                <input
-                  className="input"
-                  type="text"
-                  value={name}
-                  onChange={e => {
-                    setName(e.target.value);
-                  }}
-                  placeholder="Enter your name"
-                />
-              </p>
-              <p className="control">
-                <button
-                  onClick={join}
-                  className="button is-info"
-                  disabled={!name}
-                >
-                  Join Game
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={() => history.goBack()}
-          className="modal-close is-large"
-          aria-label="close"
-        ></button>
-      </div>
+      {role === "none" ? (
+        <JoinGameModal game={game} />
+      ) : game.state === "displayingQuestion" ||
+        game.state === "awaitingAnswer" ? (
+        <QuestionModal game={game} />
+      ) : ["finalWager", "finalAnswer", "finalJudging"].includes(game.state) ? (
+        <FinalQuestionModal game={game} />
+      ) : null}
     </>
   );
 };
