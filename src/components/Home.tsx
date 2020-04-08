@@ -48,21 +48,42 @@ const Home: FC<HomeProps> = props => {
       hostId: playerId,
       barredFromBuzzingIn: {},
       players: {},
-      categories: {}
+      currentRound: 1,
+      round1: {},
+      round2: {},
+      finalJeopardy: {
+        text: "final question",
+        solution: ""
+      }
     };
     for (let i = 0; i < numCategories; i++) {
-      game.categories[i] = {
+      game.round1[i] = {
+        categoryId: "" + i,
+        ordinal: i,
+        title: placeholderNames[i] ?? `Category ${i + 1}`,
+        questions: {}
+      };
+      game.round2[i] = {
         categoryId: "" + i,
         ordinal: i,
         title: placeholderNames[i] ?? `Category ${i + 1}`,
         questions: {}
       };
       for (let j = 0; j < questionsPerCategory; j++) {
-        game.categories[i].questions[j] = {
+        game.round1[i].questions[j] = {
           questionId: "" + j,
           ordinal: j,
           score: placeholderValues[j] || 42,
           text: `Back ${j + 1}`,
+          solution: "",
+          faceUp: i === 0 && j === 0
+        };
+        game.round2[i].questions[j] = {
+          questionId: "" + j,
+          ordinal: j,
+          score: placeholderValues[j] * 2 || 42,
+          text: `Back ${j + 1}`,
+          solution: "",
           faceUp: true
         };
       }

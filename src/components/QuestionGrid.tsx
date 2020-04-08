@@ -13,6 +13,11 @@ const byOrdinal = (a: { ordinal: number }, b: { ordinal: number }) =>
 
 const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
   const playerId = usePlayerId();
+  const { currentRound } = game;
+  if (currentRound === "final") {
+    return <div>Final Jeopardy</div>;
+  }
+  const categories = currentRound === 1 ? game.round1 : game.round2;
   return (
     <div
       className="columns is-gapless"
@@ -22,7 +27,7 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
           : undefined
       }
     >
-      {Object.values(game.categories)
+      {Object.values(categories)
         .sort(byOrdinal)
         .map(category => (
           <div
@@ -56,7 +61,7 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
                       state: "displayingQuestion",
                       activePlayer: null,
                       activeQuestion: question,
-                      [`categories.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp
+                      [`round${currentRound}.${category.categoryId}.questions.${question.questionId}.faceUp`]: !question.faceUp
                     };
 
                     firestore()

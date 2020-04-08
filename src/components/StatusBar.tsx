@@ -8,11 +8,13 @@ export interface StatusBarProps {
 
 const messages: Record<GameState, (activePlayer: string) => string> = {
   pregame: () => "Waiting for players to join",
-  selectingQuestion: (activePlayer) =>
+  selectingQuestion: activePlayer =>
     `Waiting for ${activePlayer} to pick a question`,
   displayingQuestion: () => `Waiting for someone to buzz in`,
-  awaitingAnswer: (activePlayer) =>
+  awaitingAnswer: activePlayer =>
     `Waiting for ${activePlayer} to answer the question`,
+  displayingFinal: () => `Showing final jeopardy`,
+  judgingFinal: () => `Judging answers`
 };
 
 export const getActivePlayerName = (

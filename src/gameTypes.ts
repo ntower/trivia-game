@@ -2,7 +2,9 @@ export type GameState =
   | "pregame"
   | "selectingQuestion"
   | "displayingQuestion"
-  | "awaitingAnswer";
+  | "awaitingAnswer"
+  | "displayingFinal"
+  | "judgingFinal";
 
 export interface Game {
   gameId: string;
@@ -24,9 +26,14 @@ export interface Game {
   players: {
     [playerId: string]: Player;
   };
-  categories: {
-    [categoryId: string]: Category;
-  };
+  currentRound: 1 | 2 | "final";
+  round1: CategoryCollection;
+  round2: CategoryCollection;
+  finalJeopardy: FinalQuestion;
+}
+
+export interface CategoryCollection {
+  [categoryId: string]: Category;
 }
 
 export interface Player {
@@ -49,5 +56,11 @@ export interface Question {
   ordinal: number;
   score: number;
   text: string;
+  solution: string;
   faceUp: boolean;
+}
+
+export interface FinalQuestion {
+  text: string;
+  solution: string;
 }

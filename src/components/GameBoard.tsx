@@ -67,13 +67,39 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
       return;
     }
 
-    const updatePayload: firestore.UpdateData = {
+    const { currentRound } = game;
+    if (currentRound === "final") {
+      console.warn("judging final jeopardy not yet implemented");
+      return;
+    }
+    const categories = game.currentRound === 1 ? game.round1 : game.round1;
+    let hasMoreQuestions = Object.values(categories).some(category =>
+      Object.values(category.questions).some(question => question.faceUp)
+    );
+
+    let updatePayload: firestore.UpdateData = {
       [`players.${game.activePlayer}.score`]:
         game.players[game.activePlayer].score + game.activeQuestion.score,
-      state: "selectingQuestion",
       lastPlayerToSuccessfullyAnswer: game.activePlayer,
       barredFromBuzzingIn: {}
     };
+    if (hasMoreQuestions) {
+      updatePayload = {
+        state: "selectingQuestion"
+      };
+    } else if (currentRound === 1) {
+      updatePayload = {
+        state: "selectingQuestion",
+        currentRound: 2
+      };
+    } else {
+      // currentRound === 2
+      updatePayload = {
+        state: "displayingFinal",
+        currentRound: "final"
+      };
+    }
+
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
 
@@ -92,11 +118,37 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
   };
 
   const abandonQuestion = () => {
-    const updatePayload: firestore.UpdateData = {
-      state: "selectingQuestion",
+    const { currentRound } = game;
+    if (currentRound === "final") {
+      console.warn("judging final jeopardy not yet implemented");
+      return;
+    }
+    const categories = game.currentRound === 1 ? game.round1 : game.round1;
+    let hasMoreQuestions = Object.values(categories).some(category =>
+      Object.values(category.questions).some(question => question.faceUp)
+    );
+
+    let updatePayload: firestore.UpdateData = {
       activePlayer: game.lastPlayerToSuccessfullyAnswer,
       barredFromBuzzingIn: {}
     };
+    if (hasMoreQuestions) {
+      updatePayload = {
+        state: "selectingQuestion"
+      };
+    } else if (currentRound === 1) {
+      updatePayload = {
+        state: "selectingQuestion",
+        currentRound: 2
+      };
+    } else {
+      // currentRound === 2
+      updatePayload = {
+        state: "displayingFinal",
+        currentRound: "final"
+      };
+    }
+
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
 
