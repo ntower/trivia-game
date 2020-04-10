@@ -5,7 +5,8 @@ export type GameState =
   | "awaitingAnswer"
   | "finalWager"
   | "finalAnswer"
-  | "finalJudging";
+  | "finalJudging"
+  | "endgame";
 
 export interface Game {
   gameId: string;
@@ -41,6 +42,9 @@ export interface Player {
   playerId: string;
   name: string;
   score: number;
+  finalWager?: number;
+  finalSolution?: string;
+  finalJudgmentReceived?: boolean;
 }
 
 export interface Category {

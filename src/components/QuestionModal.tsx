@@ -3,7 +3,7 @@ import { Game } from "../gameTypes";
 import { firestore } from "firebase";
 import { usePlayerId } from "./playerId";
 import { getRole } from "./GameBoard";
-import { getActivePlayerName } from "./StatusBar";
+import { getPlayerName } from "./StatusBar";
 
 export interface QuestionModalProps {
   game: Game;
@@ -53,17 +53,20 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     };
     if (hasMoreQuestions) {
       updatePayload = {
+        ...updatePayload,
         state: "selectingQuestion"
       };
     } else if (currentRound === 1) {
       updatePayload = {
+        ...updatePayload,
         state: "selectingQuestion",
         currentRound: 2
       };
     } else {
       // currentRound === 2
       updatePayload = {
-        state: "displayingFinal",
+        ...updatePayload,
+        state: "finalWager",
         currentRound: "final"
       };
     }
@@ -112,7 +115,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     } else {
       // currentRound === 2
       updatePayload = {
-        state: "displayingFinal",
+        state: "finalWager",
         currentRound: "final"
       };
     }
@@ -148,7 +151,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
           {game.state === "awaitingAnswer" && (
             <>
               <h3 className="subtitle">
-                {getActivePlayerName(game, playerId, true)} buzzed in first
+                {getPlayerName(game, playerId, true)} buzzed in first
               </h3>
               {role === "host" ? (
                 <>

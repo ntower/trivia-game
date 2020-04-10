@@ -85,7 +85,7 @@ const Home: FC<HomeProps> = props => {
           score: placeholderValues[j] * 2 || 42,
           text: `Back ${j + 1}`,
           solution: "",
-          faceUp: true
+          faceUp: i === 0 && j === 0
         };
       }
     }

@@ -7,7 +7,7 @@ import { usePlayerId } from "./playerId";
 import RoleBar from "./RoleBar";
 import QuestionModal from "./QuestionModal";
 import JoinGameModal from "./JoinGameModal";
-import FinalQuestionModal from "./FinalQuestionModal";
+import FinalModal from "./FinalModal";
 
 export interface GameBoardProps {
   game: Game;
@@ -50,7 +50,7 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
         game.state === "awaitingAnswer" ? (
         <QuestionModal game={game} />
       ) : ["finalWager", "finalAnswer", "finalJudging"].includes(game.state) ? (
-        <FinalQuestionModal game={game} />
+        <FinalModal game={game} />
       ) : null}
     </>
   );

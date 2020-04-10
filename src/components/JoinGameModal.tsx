@@ -1,7 +1,6 @@
 import React, { FC, useState } from "react";
 import { Game, Player } from "../gameTypes";
 import { usePlayerId } from "./playerId";
-import { join } from "path";
 import { useHistory } from "react-router-dom";
 import { firestore } from "firebase";
 

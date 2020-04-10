@@ -15,10 +15,11 @@ const messages: Record<GameState, (activePlayer: string) => string> = {
     `Waiting for ${activePlayer} to answer the question`,
   finalWager: () => "",
   finalAnswer: () => "",
-  finalJudging: () => ""
+  finalJudging: () => "",
+  endgame: () => "You're still here? It's over. Go home. Go!"
 };
 
-export const getActivePlayerName = (
+export const getPlayerName = (
   game: Game,
   playerId: string,
   titleCase?: boolean
@@ -33,7 +34,7 @@ export const getActivePlayerName = (
 const StatusBar: FC<StatusBarProps> = ({ game }) => {
   const playerId = usePlayerId();
 
-  const activePlayerName = getActivePlayerName(game, playerId);
+  const activePlayerName = getPlayerName(game, playerId);
 
   return (
     <div className="has-text-centered">
