@@ -8,9 +8,16 @@ export type GameState =
   | "finalJudging"
   | "endgame";
 
-export interface Game {
-  gameId: string;
+export interface GameTemplate {
   name: string;
+  templateId: string;
+  round1: CategoryCollection;
+  round2: CategoryCollection;
+  finalQuestion: FinalQuestion;
+}
+
+export interface Game extends GameTemplate {
+  gameId: string;
   state: GameState;
   /**
    * The id of the player who needs to make the next action
@@ -29,9 +36,6 @@ export interface Game {
     [playerId: string]: Player;
   };
   currentRound: 1 | 2 | "final";
-  round1: CategoryCollection;
-  round2: CategoryCollection;
-  finalQuestion: FinalQuestion;
 }
 
 export interface CategoryCollection {

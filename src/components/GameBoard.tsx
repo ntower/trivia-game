@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { Game } from "../gameTypes";
 import QuestionGrid from "./QuestionGrid";
 import StatusBar from "./StatusBar";

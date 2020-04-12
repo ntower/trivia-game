@@ -1,7 +1,5 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { Game } from "../gameTypes";
-import { usePlayerId } from "./playerId";
-import { getRole } from "./GameBoard";
 import Wager from "./FinalWager";
 import Answer from "./FinalAnswer";
 import Judging from "./FinalJudging";

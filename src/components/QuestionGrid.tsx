@@ -30,10 +30,7 @@ const QuestionGrid: FC<QuestionGridProps> = ({ game }) => {
       {Object.values(categories)
         .sort(byOrdinal)
         .map(category => (
-          <div
-            key={category.categoryId}
-            className="column is-2 has-text-centered"
-          >
+          <div key={category.categoryId} className="column has-text-centered">
             <div
               className="box has-background-light"
               style={{
