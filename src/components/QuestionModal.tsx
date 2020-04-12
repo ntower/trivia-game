@@ -40,7 +40,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
       console.warn("judging final jeopardy not yet implemented");
       return;
     }
-    const categories = game.currentRound === 1 ? game.round1 : game.round1;
+    const categories = game.currentRound === 1 ? game.round1 : game.round2;
     let hasMoreQuestions = Object.values(categories).some(category =>
       Object.values(category.questions).some(question => question.faceUp)
     );
@@ -94,7 +94,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
       console.warn("judging final jeopardy not yet implemented");
       return;
     }
-    const categories = game.currentRound === 1 ? game.round1 : game.round1;
+    const categories = game.currentRound === 1 ? game.round1 : game.round2;
     let hasMoreQuestions = Object.values(categories).some(category =>
       Object.values(category.questions).some(question => question.faceUp)
     );
