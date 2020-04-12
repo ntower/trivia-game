@@ -128,7 +128,6 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
       <div className="modal-background"></div>
       <div className="modal-content">
         <div className="box">
-          <h2 className="title">Foo</h2>
           <p>{game.activeQuestion?.text ?? "Huh... the question is missing"}</p>
           <br />
           {game.state === "displayingQuestion" && role !== "host" && (
