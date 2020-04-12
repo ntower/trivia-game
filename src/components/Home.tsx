@@ -48,7 +48,7 @@ const Home: FC<HomeProps> = props => {
         snapshot => {
           const templates = snapshot.docs.map(
             doc => doc.data() as GameTemplate
-          );
+          ).filter(template => !template.hidden);
           setTemplateList(templates);
           if (!selectedTemplateId) {
             setSelectedTemplateId(templates[0]?.templateId ?? "");

@@ -10,6 +10,7 @@ export type GameState =
 
 export interface GameTemplate {
   name: string;
+  hidden?: boolean;
   templateId: string;
   round1: CategoryCollection;
   round2: CategoryCollection;
