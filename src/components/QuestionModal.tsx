@@ -105,16 +105,19 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     };
     if (hasMoreQuestions) {
       updatePayload = {
+        ...updatePayload,
         state: "selectingQuestion"
       };
     } else if (currentRound === 1) {
       updatePayload = {
+        ...updatePayload,
         state: "selectingQuestion",
         currentRound: 2
       };
     } else {
       // currentRound === 2
       updatePayload = {
+        ...updatePayload,
         state: "finalWager",
         currentRound: "final"
       };

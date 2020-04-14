@@ -18,6 +18,7 @@ const QuestionCard: FC<QuestionCardProps> = ({ question, onClick }) => {
       style={{
         height: "5em"
       }}
+      onScroll={e => {}}
       onClick={onClick}
     >
       {question.faceUp ? `$${question.score}` : ""}
