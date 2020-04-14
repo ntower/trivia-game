@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Game } from "../gameTypes";
 import { firestore } from "firebase";
 import { usePlayerId } from "./playerId";
@@ -13,6 +13,29 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
   const playerId = usePlayerId();
   const role = getRole(game, playerId);
 
+  const [noAnswerCountdown, setNoAnswerCountdown] = useState(0);
+  const awaitingBuzzIn = game.state === "awaitingBuzzIn";
+  useEffect(() => {
+    if (awaitingBuzzIn) {
+      setNoAnswerCountdown(10);
+      const id = setInterval(() => {
+        setNoAnswerCountdown(prev => {
+          if (prev === 1) {
+            clearInterval(id);
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(id);
+    }
+  }, [awaitingBuzzIn]);
+
+  const releaseBuzzers = () => {
+    let updatePayload: firestore.UpdateData = {
+      state: "awaitingBuzzIn"
+    };
+    firestore().collection("games").doc(game.gameId).update(updatePayload);
+  };
   const buzzIn = () => {
     // Guard against synchronoization errors. We only want to update the db
     //   if someone else hasn't buzzed in already
@@ -20,9 +43,9 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     firestore().runTransaction(async t => {
       const doc = await t.get(gameRef);
       const state = (doc.data() as Game).state;
-      if (state === "displayingQuestion") {
+      if (state === "awaitingBuzzIn") {
         const updatePayload: firestore.UpdateData = {
-          state: "awaitingAnswer",
+          state: "judgingAnswer",
           activePlayer: playerId
         };
         t.update(gameRef, updatePayload);
@@ -82,7 +105,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     const updatePayload: firestore.UpdateData = {
       [`players.${game.activePlayer}.score`]:
         game.players[game.activePlayer].score - game.activeQuestion.score,
-      state: "displayingQuestion",
+      state: "awaitingBuzzIn",
       [`barredFromBuzzingIn.${game.activePlayer}`]: true
     };
     firestore().collection("games").doc(game.gameId).update(updatePayload);
@@ -134,6 +157,11 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
           <p>{game.activeQuestion?.text ?? "Huh... the question is missing"}</p>
           <br />
           {game.state === "displayingQuestion" && role !== "host" && (
+            <button className="button is-info is-large" disabled>
+              GET READY...
+            </button>
+          )}
+          {game.state === "awaitingBuzzIn" && role !== "host" && (
             <button
               onClick={buzzIn}
               className="button is-info is-large"
@@ -144,13 +172,23 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
           )}
           {game.state === "displayingQuestion" && role === "host" && (
             <button
-              onClick={abandonQuestion}
+              onClick={releaseBuzzers}
               className="button is-info is-large"
             >
-              No one answered
+              Let them answer
             </button>
           )}
-          {game.state === "awaitingAnswer" && (
+          {game.state === "awaitingBuzzIn" && role === "host" && (
+            <button
+              onClick={abandonQuestion}
+              className="button is-info is-large"
+              disabled={noAnswerCountdown > 0}
+            >
+              No one buzzed in
+              {noAnswerCountdown > 0 ? ` (${noAnswerCountdown})` : ""}
+            </button>
+          )}
+          {game.state === "judgingAnswer" && (
             <>
               <h3 className="subtitle">
                 {getPlayerName(game, playerId, true)} buzzed in first

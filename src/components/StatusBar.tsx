@@ -10,9 +10,11 @@ const messages: Record<GameState, (activePlayer: string) => string> = {
   pregame: () => "Waiting for players to join",
   selectingQuestion: activePlayer =>
     `Waiting for ${activePlayer} to pick a question`,
-  displayingQuestion: () => `Waiting for someone to buzz in`,
-  awaitingAnswer: activePlayer =>
+  displayingQuestion: () => `Waiting for the host to stop speakin`,
+  awaitingBuzzIn: activePlayer =>
     `Waiting for ${activePlayer} to answer the question`,
+  judgingAnswer: activePlayer =>
+    `Waiting for ${activePlayer} to answer and be judged`,
   finalWager: () => "",
   finalAnswer: () => "",
   finalJudging: () => "",

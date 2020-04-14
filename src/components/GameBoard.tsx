@@ -47,7 +47,8 @@ const GameBoard: FC<GameBoardProps> = ({ game }) => {
       {role === "none" ? (
         <JoinGameModal game={game} />
       ) : game.state === "displayingQuestion" ||
-        game.state === "awaitingAnswer" ? (
+        game.state === "awaitingBuzzIn" ||
+        game.state === "judgingAnswer" ? (
         <QuestionModal game={game} />
       ) : ["finalWager", "finalAnswer", "finalJudging"].includes(game.state) ? (
         <FinalModal game={game} />
