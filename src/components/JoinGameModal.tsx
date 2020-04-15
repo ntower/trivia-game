@@ -40,6 +40,11 @@ const JoinGameModal: FC<JoinGameModalProps> = ({ game }) => {
                 onChange={e => {
                   setName(e.target.value);
                 }}
+                onKeyDown={e => {
+                  if (e.keyCode === 13 && name) {
+                    join();
+                  }
+                }}
                 placeholder="Enter your name"
               />
             </p>

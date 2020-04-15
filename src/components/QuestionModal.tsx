@@ -16,7 +16,9 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
   const [noAnswerCountdown, setNoAnswerCountdown] = useState(0);
   const awaitingBuzzIn = game.state === "awaitingBuzzIn";
   useEffect(() => {
-    if (awaitingBuzzIn) {
+    if (awaitingBuzzIn && Object.keys(game.barredFromBuzzingIn).length === 0) {
+      // To prevent accidentally double clicking, impose a countdown before host can
+      //   mark it as "no answer"
       setNoAnswerCountdown(10);
       const id = setInterval(() => {
         setNoAnswerCountdown(prev => {
@@ -27,7 +29,11 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
         });
       }, 1000);
       return () => clearInterval(id);
+    } else {
+      setNoAnswerCountdown(0);
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awaitingBuzzIn]);
 
   const releaseBuzzers = () => {
