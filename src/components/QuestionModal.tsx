@@ -19,7 +19,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     if (awaitingBuzzIn && Object.keys(game.barredFromBuzzingIn).length === 0) {
       // To prevent accidentally double clicking, impose a countdown before host can
       //   mark it as "no answer"
-      setNoAnswerCountdown(10);
+      setNoAnswerCountdown(3);
       const id = setInterval(() => {
         setNoAnswerCountdown(prev => {
           if (prev === 1) {
@@ -162,6 +162,13 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
         <div className="box">
           <p>{game.activeQuestion?.text ?? "Huh... the question is missing"}</p>
           <br />
+          {role === "host" && (
+            <>
+              <div className="subtitle">Answer (only visible to you):</div>
+              <p>{game.activeQuestion?.solution}</p>
+              <br />
+            </>
+          )}
           {game.state === "displayingQuestion" && role !== "host" && (
             <button className="button is-info is-large" disabled>
               GET READY...

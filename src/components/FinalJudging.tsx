@@ -60,6 +60,10 @@ const Judging: FC<AnswerProps> = ({ game }) => {
         {game.players[activePlayer].finalSolution ??
           "Hmm... there doesn't seem to be anything here"}
       </p>
+      <br />
+      <h2 className="subtitle">... and wagered:</h2>
+      <p>{game.players[activePlayer].finalWager}</p>
+      <br />
       {role === "host" ? (
         <>
           <button
