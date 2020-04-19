@@ -19,42 +19,60 @@ export interface HomeProps {}
 //   "AWS"
 // ];
 
-const Home: FC<HomeProps> = props => {
+interface FrontPageData {
+  header?: string;
+  subheader?: string;
+}
+
+const Home: FC<HomeProps> = (props) => {
   const history = useHistory();
   // const [name, setName] = useState("");
   const playerId = usePlayerId();
+
+  const [frontPage, setFrontPage] = useState<FrontPageData | null>(null);
+  useEffect(() => {
+    return firestore()
+      .collection("general")
+      .doc("frontpage")
+      .onSnapshot(
+        (snapshot) => {
+          setFrontPage(snapshot.data() as FrontPageData);
+        },
+        (err) => setGameList([])
+      );
+  });
 
   const [gameList, setGameList] = useState<Game[]>([]);
   useEffect(() => {
     return firestore()
       .collection("games")
       .onSnapshot(
-        snapshot => {
-          setGameList(snapshot.docs.map(doc => doc.data() as Game));
+        (snapshot) => {
+          setGameList(snapshot.docs.map((doc) => doc.data() as Game));
         },
-        err => setGameList([])
+        (err) => setGameList([])
       );
   }, []);
 
   const [templateList, setTemplateList] = useState<GameTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const selectedTemplate = templateList.find(
-    template => template.templateId === selectedTemplateId
+    (template) => template.templateId === selectedTemplateId
   );
   useEffect(() => {
     return firestore()
       .collection("templates")
       .onSnapshot(
-        snapshot => {
-          const templates = snapshot.docs.map(
-            doc => doc.data() as GameTemplate
-          ).filter(template => !template.hidden);
+        (snapshot) => {
+          const templates = snapshot.docs
+            .map((doc) => doc.data() as GameTemplate)
+            .filter((template) => !template.hidden);
           setTemplateList(templates);
           if (!selectedTemplateId) {
             setSelectedTemplateId(templates[0]?.templateId ?? "");
           }
         },
-        err => setTemplateList([])
+        (err) => setTemplateList([])
       );
   }, [selectedTemplateId]);
 
@@ -75,7 +93,7 @@ const Home: FC<HomeProps> = props => {
       hostId: playerId,
       barredFromBuzzingIn: {},
       players: {},
-      currentRound: 1
+      currentRound: 1,
     };
     await ref.set(game);
     history.push(`/game/${ref.id}`);
@@ -731,15 +749,21 @@ const Home: FC<HomeProps> = props => {
     <div className="hero-body">
       <div className="container has-text-centered">
         <div className="column is-6 is-offset-3">
+          {frontPage && (
+            <div className="box">
+              <h1 className="title">{frontPage.header}</h1>
+              <h2 className="title is-4">{frontPage.subheader}</h2>
+            </div>
+          )}
           <h1 className="title">Start a game</h1>
           <div className="box">
             <div className="field is-grouped">
               <p className="select" style={{ width: "100%" }}>
                 <select
                   style={{ width: "100%" }}
-                  onChange={e => setSelectedTemplateId(e.target.value)}
+                  onChange={(e) => setSelectedTemplateId(e.target.value)}
                 >
-                  {templateList.map(template => (
+                  {templateList.map((template) => (
                     <option
                       key={template.templateId}
                       value={template.templateId}
@@ -763,7 +787,7 @@ const Home: FC<HomeProps> = props => {
           {gameList.length > 0 && (
             <>
               <h2 className="title is-4">Or join an existing game</h2>
-              {gameList.map(game => (
+              {gameList.map((game) => (
                 <React.Fragment key={game.gameId}>
                   <Link key={game.gameId} to={`/game/${game.gameId}`}>
                     {game.name || game.gameId}
