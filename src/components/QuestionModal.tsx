@@ -21,7 +21,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
       //   mark it as "no answer"
       setNoAnswerCountdown(3);
       const id = setInterval(() => {
-        setNoAnswerCountdown(prev => {
+        setNoAnswerCountdown((prev) => {
           if (prev === 1) {
             clearInterval(id);
           }
@@ -38,7 +38,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
 
   const releaseBuzzers = () => {
     let updatePayload: firestore.UpdateData = {
-      state: "awaitingBuzzIn"
+      state: "awaitingBuzzIn",
     };
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
@@ -46,13 +46,13 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     // Guard against synchronoization errors. We only want to update the db
     //   if someone else hasn't buzzed in already
     const gameRef = firestore().collection("games").doc(game.gameId);
-    firestore().runTransaction(async t => {
+    firestore().runTransaction(async (t) => {
       const doc = await t.get(gameRef);
       const state = (doc.data() as Game).state;
       if (state === "awaitingBuzzIn") {
         const updatePayload: firestore.UpdateData = {
           state: "judgingAnswer",
-          activePlayer: playerId
+          activePlayer: playerId,
         };
         t.update(gameRef, updatePayload);
       }
@@ -70,33 +70,33 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
       return;
     }
     const categories = game.currentRound === 1 ? game.round1 : game.round2;
-    let hasMoreQuestions = Object.values(categories).some(category =>
-      Object.values(category.questions).some(question => question.faceUp)
+    let hasMoreQuestions = Object.values(categories).some((category) =>
+      Object.values(category.questions).some((question) => question.faceUp)
     );
 
     let updatePayload: firestore.UpdateData = {
       [`players.${game.activePlayer}.score`]:
         game.players[game.activePlayer].score + game.activeQuestion.score,
       lastPlayerToSuccessfullyAnswer: game.activePlayer,
-      barredFromBuzzingIn: {}
+      barredFromBuzzingIn: {},
     };
     if (hasMoreQuestions) {
       updatePayload = {
         ...updatePayload,
-        state: "selectingQuestion"
+        state: "selectingQuestion",
       };
     } else if (currentRound === 1) {
       updatePayload = {
         ...updatePayload,
         state: "selectingQuestion",
-        currentRound: 2
+        currentRound: 2,
       };
     } else {
       // currentRound === 2
       updatePayload = {
         ...updatePayload,
         state: "finalWager",
-        currentRound: "final"
+        currentRound: "final",
       };
     }
 
@@ -112,7 +112,7 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
       [`players.${game.activePlayer}.score`]:
         game.players[game.activePlayer].score - game.activeQuestion.score,
       state: "awaitingBuzzIn",
-      [`barredFromBuzzingIn.${game.activePlayer}`]: true
+      [`barredFromBuzzingIn.${game.activePlayer}`]: true,
     };
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
@@ -124,31 +124,31 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
       return;
     }
     const categories = game.currentRound === 1 ? game.round1 : game.round2;
-    let hasMoreQuestions = Object.values(categories).some(category =>
-      Object.values(category.questions).some(question => question.faceUp)
+    let hasMoreQuestions = Object.values(categories).some((category) =>
+      Object.values(category.questions).some((question) => question.faceUp)
     );
 
     let updatePayload: firestore.UpdateData = {
       activePlayer: game.lastPlayerToSuccessfullyAnswer,
-      barredFromBuzzingIn: {}
+      barredFromBuzzingIn: {},
     };
     if (hasMoreQuestions) {
       updatePayload = {
         ...updatePayload,
-        state: "selectingQuestion"
+        state: "selectingQuestion",
       };
     } else if (currentRound === 1) {
       updatePayload = {
         ...updatePayload,
         state: "selectingQuestion",
-        currentRound: 2
+        currentRound: 2,
       };
     } else {
       // currentRound === 2
       updatePayload = {
         ...updatePayload,
         state: "finalWager",
-        currentRound: "final"
+        currentRound: "final",
       };
     }
 
@@ -169,12 +169,12 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
               <br />
             </>
           )}
-          {game.state === "displayingQuestion" && role !== "host" && (
+          {game.state === "displayingQuestion" && role === "player" && (
             <button className="button is-info is-large" disabled>
               GET READY...
             </button>
           )}
-          {game.state === "awaitingBuzzIn" && role !== "host" && (
+          {game.state === "awaitingBuzzIn" && role === "player" && (
             <button
               onClick={buzzIn}
               className="button is-info is-large"

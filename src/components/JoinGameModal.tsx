@@ -17,10 +17,10 @@ const JoinGameModal: FC<JoinGameModalProps> = ({ game }) => {
     const player: Player = {
       playerId,
       name,
-      score: 0
+      score: 0,
     };
     const updatePayload: firestore.UpdateData = {
-      [`players.${playerId}`]: player
+      [`players.${playerId}`]: player,
     };
 
     firestore().collection("games").doc(game.gameId).update(updatePayload);
@@ -37,10 +37,10 @@ const JoinGameModal: FC<JoinGameModalProps> = ({ game }) => {
                 className="input"
                 type="text"
                 value={name}
-                onChange={e => {
+                onChange={(e) => {
                   setName(e.target.value);
                 }}
-                onKeyDown={e => {
+                onKeyDown={(e) => {
                   if (e.keyCode === 13 && name) {
                     join();
                   }
@@ -58,6 +58,9 @@ const JoinGameModal: FC<JoinGameModalProps> = ({ game }) => {
               </button>
             </p>
           </div>
+          <p className="subtitle">
+            Or to spectate, just wait on this screen until the game has started
+          </p>
         </div>
       </div>
       <button
