@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useRef } from "react";
 import { Game } from "../gameTypes";
 import { firestore } from "firebase";
 import { usePlayerId } from "./playerId";
@@ -14,6 +14,8 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
   const role = getRole(game, playerId);
 
   const [noAnswerCountdown, setNoAnswerCountdown] = useState(0);
+  const lockoutId = useRef(-1);
+
   const awaitingBuzzIn = game.state === "awaitingBuzzIn";
   useEffect(() => {
     if (awaitingBuzzIn && Object.keys(game.barredFromBuzzingIn).length === 0) {
@@ -43,6 +45,9 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
     firestore().collection("games").doc(game.gameId).update(updatePayload);
   };
   const buzzIn = () => {
+    if (lockoutId.current > -1) {
+      return;
+    }
     // Guard against synchronoization errors. We only want to update the db
     //   if someone else hasn't buzzed in already
     const gameRef = firestore().collection("games").doc(game.gameId);
@@ -170,7 +175,18 @@ const QuestionModal: FC<QuestionModalProps> = ({ game }) => {
             </>
           )}
           {game.state === "displayingQuestion" && role === "player" && (
-            <button className="button is-info is-large" disabled>
+            <button
+              className="button is-outline is-large"
+              style={{
+                cursor: "not-allowed",
+              }}
+              onClick={() => {
+                window.clearTimeout(lockoutId.current);
+                lockoutId.current = window.setTimeout(() => {
+                  lockoutId.current = -1;
+                }, 250);
+              }}
+            >
               GET READY...
             </button>
           )}
